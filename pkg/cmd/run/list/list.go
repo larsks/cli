@@ -92,8 +92,15 @@ func listRun(opts *ListOptions) error {
 	if opts.ShowProgress {
 		opts.IO.StopProgressIndicator()
 	}
+
+	if len(runs) == 0 {
+		if !opts.PlainOutput {
+			fmt.Fprintln(out, "No runs found")
+		}
+		return nil
+	}
+
 	for _, run := range runs {
-		//idStr := cs.Cyanf("%d", run.ID)
 		if opts.PlainOutput {
 			tp.AddField(string(run.Status), nil, nil)
 			tp.AddField(string(run.Conclusion), nil, nil)
