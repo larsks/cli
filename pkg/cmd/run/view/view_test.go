@@ -19,6 +19,7 @@ func TestNewCmdView(t *testing.T) {
 		wants    ViewOptions
 		wantsErr bool
 	}{
+		// TODO show progress, prompt, exit status, verbose
 		{
 			name:     "blank",
 			wantsErr: true,
@@ -64,4 +65,8 @@ func TestNewCmdView(t *testing.T) {
 			assert.Equal(t, tt.wants.RunID, gotOpts.RunID)
 		})
 	}
+}
+
+func TestViewRun(t *testing.T) {
+	// TODO
 }

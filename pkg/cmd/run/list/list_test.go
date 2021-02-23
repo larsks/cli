@@ -72,3 +72,7 @@ func TestNewCmdList(t *testing.T) {
 		})
 	}
 }
+
+func TestListRun(t *testing.T) {
+	// TODO
+}
