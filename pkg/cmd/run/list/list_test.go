@@ -135,6 +135,23 @@ func TestListRun(t *testing.T) {
 			},
 			wantOut: "✓  cool commit  successful   trunk  push  1\n-  cool commit  in progress  trunk  push  2\nX  cool commit  timed out    trunk  push  3\n✓  cool commit  cancelled    trunk  push  4\nX  cool commit  failed       trunk  push  5\n✓  cool commit  neutral      trunk  push  6\n✓  cool commit  skipped      trunk  push  7\n-  cool commit  requested    trunk  push  8\n-  cool commit  queued       trunk  push  9\nX  cool commit  stale        trunk  push  10\n\nFor details on a run, try: gh run view <run-id>\n",
 		},
+		{
+			name: "blank nontty",
+			opts: &ListOptions{
+				Limit:       defaultLimit,
+				PlainOutput: true,
+			},
+			nontty: true,
+			stubs: func(reg *httpmock.Registry) {
+				reg.Register(
+					httpmock.REST("GET", "repos/OWNER/REPO/actions/runs"),
+					httpmock.JSONResponse(shared.RunsPayload{
+						TotalCount:   10,
+						WorkflowRuns: runs,
+					}))
+			},
+			wantOut: "completed\tsuccess\tcool commit\tsuccessful\ttrunk\tpush\t4m34s\t1\nin_progress\t\tcool commit\tin progress\ttrunk\tpush\t4m34s\t2\ncompleted\ttimed_out\tcool commit\ttimed out\ttrunk\tpush\t4m34s\t3\ncompleted\tcancelled\tcool commit\tcancelled\ttrunk\tpush\t4m34s\t4\ncompleted\tfailure\tcool commit\tfailed\ttrunk\tpush\t4m34s\t5\ncompleted\tneutral\tcool commit\tneutral\ttrunk\tpush\t4m34s\t6\ncompleted\tskipped\tcool commit\tskipped\ttrunk\tpush\t4m34s\t7\nrequested\t\tcool commit\trequested\ttrunk\tpush\t4m34s\t8\nqueued\t\tcool commit\tqueued\ttrunk\tpush\t4m34s\t9\ncompleted\tstale\tcool commit\tstale\ttrunk\tpush\t4m34s\t10\n",
+		},
 		/*
 			// TODO pagination
 				{

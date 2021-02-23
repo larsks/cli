@@ -132,8 +132,10 @@ func listRun(opts *ListOptions) error {
 		return err
 	}
 
-	fmt.Fprintln(out)
-	fmt.Fprintln(out, "For details on a run, try: gh run view <run-id>")
+	if !opts.PlainOutput {
+		fmt.Fprintln(out)
+		fmt.Fprintln(out, "For details on a run, try: gh run view <run-id>")
+	}
 
 	return nil
 }
