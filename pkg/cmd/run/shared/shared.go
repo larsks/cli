@@ -137,7 +137,6 @@ func IsFailureState(c Conclusion) bool {
 }
 
 type RunsPayload struct {
-	TotalCount   int   `json:"total_count"`
 	WorkflowRuns []Run `json:"workflow_runs"`
 }
 
