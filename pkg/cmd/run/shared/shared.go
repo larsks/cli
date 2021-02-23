@@ -157,7 +157,6 @@ func GetRuns(client *api.Client, repo ghrepo.Interface, limit int) ([]Run, error
 
 		err := client.REST(repo.RepoHost(), "GET", path, nil, &result)
 		if err != nil {
-			// TODO better err handle
 			return nil, err
 		}
 
@@ -171,6 +170,11 @@ func GetRuns(client *api.Client, repo ghrepo.Interface, limit int) ([]Run, error
 				break
 			}
 		}
+
+		if len(result.WorkflowRuns) < perPage {
+			break
+		}
+
 		page++
 	}
 

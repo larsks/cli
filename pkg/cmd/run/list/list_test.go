@@ -2,9 +2,11 @@ package list
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/cli/cli/internal/ghrepo"
 	"github.com/cli/cli/pkg/cmd/run/shared"
@@ -78,6 +80,39 @@ func TestNewCmdList(t *testing.T) {
 }
 
 func TestListRun(t *testing.T) {
+
+	testRun := func(name string, id int, s shared.Status, c shared.Conclusion) shared.Run {
+		created, _ := time.Parse("2006-01-02 15:04:05", "2021-02-23 04:51:00")
+		updated, _ := time.Parse("2006-01-02 15:04:05", "2021-02-23 04:55:34")
+		return shared.Run{
+			Name:       name,
+			ID:         id,
+			CreatedAt:  created,
+			UpdatedAt:  updated,
+			Status:     s,
+			Conclusion: c,
+			Event:      "push",
+			HeadBranch: "trunk",
+			JobsURL:    fmt.Sprintf("runs/%d/jobs", id),
+			HeadCommit: shared.Commit{"cool commit"},
+			HeadSha:    "1234567890",
+			URL:        fmt.Sprintf("runs/%d", id),
+		}
+	}
+
+	runs := []shared.Run{
+		testRun("successful", 1, shared.Completed, shared.Success),
+		testRun("in progress", 2, shared.InProgress, ""),
+		testRun("timed out", 3, shared.Completed, shared.TimedOut),
+		testRun("cancelled", 4, shared.Completed, shared.Cancelled),
+		testRun("failed", 5, shared.Completed, shared.Failure),
+		testRun("neutral", 6, shared.Completed, shared.Neutral),
+		testRun("skipped", 7, shared.Completed, shared.Skipped),
+		testRun("requested", 8, shared.Requested, ""),
+		testRun("queued", 9, shared.Queued, ""),
+		testRun("stale", 10, shared.Completed, shared.Stale),
+	}
+
 	tests := []struct {
 		name    string
 		opts    *ListOptions
@@ -85,37 +120,39 @@ func TestListRun(t *testing.T) {
 		stubs   func(*httpmock.Registry)
 		nontty  bool
 	}{
+		{
+			name: "blank tty",
+			opts: &ListOptions{
+				Limit: defaultLimit,
+			},
+			stubs: func(reg *httpmock.Registry) {
+				reg.Register(
+					httpmock.REST("GET", "repos/OWNER/REPO/actions/runs"),
+					httpmock.JSONResponse(shared.RunsPayload{
+						TotalCount:   10,
+						WorkflowRuns: runs,
+					}))
+			},
+			wantOut: "✓  cool commit  successful   trunk  push  1\n-  cool commit  in progress  trunk  push  2\nX  cool commit  timed out    trunk  push  3\n✓  cool commit  cancelled    trunk  push  4\nX  cool commit  failed       trunk  push  5\n✓  cool commit  neutral      trunk  push  6\n✓  cool commit  skipped      trunk  push  7\n-  cool commit  requested    trunk  push  8\n-  cool commit  queued       trunk  push  9\nX  cool commit  stale        trunk  push  10\n\nFor details on a run, try: gh run view <run-id>\n",
+		},
 		/*
-			{
-				name: "blank tty",
-				opts: &ListOptions{
-					Limit: defaultLimit,
+			// TODO pagination
+				{
+					name: "blank nontty",
+					opts: &ListOptions{
+						Limit: defaultLimit,
+					},
+					nontty:  true,
+					wantOut: "TODO",
 				},
-				stubs: func(reg *httpmock.Registry) {
-					reg.Register(
-						// TODO parameterize limit
-						httpmock.REST("GET", "repos/OWNER/REPO/actions/runs?per_page=10"),
-						// TODO fill
-						httpmock.JSONResponse(RunsPayload{}),
-					)
+				{
+					// TODO unclear how to check that limit is properly passed
+					name: "respects limit",
+					opts: &ListOptions{
+						Limit: 1,
+					},
+					wantOut: "TODO",
 				},
-				wantOut: "TODO",
-			},
-			{
-				name: "blank nontty",
-				opts: &ListOptions{
-					Limit: defaultLimit,
-				},
-				nontty:  true,
-				wantOut: "TODO",
-			},
-			{
-				name: "respects limit",
-				opts: &ListOptions{
-					Limit: 1,
-				},
-				wantOut: "TODO",
-			},
 		*/
 		{
 			name: "no results nontty",
