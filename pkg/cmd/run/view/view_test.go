@@ -21,11 +21,11 @@ func TestNewCmdView(t *testing.T) {
 	}{
 		// TODO show progress, prompt, exit status, verbose
 		{
-			name:     "blank",
+			name:     "blank nontty",
 			wantsErr: true,
 		},
 		{
-			name: "with arg",
+			name: "with arg nontty",
 			cli:  "1234",
 			wants: ViewOptions{
 				RunID: "1234",
@@ -63,6 +63,10 @@ func TestNewCmdView(t *testing.T) {
 			}
 
 			assert.Equal(t, tt.wants.RunID, gotOpts.RunID)
+			assert.Equal(t, tt.wants.ShowProgress, gotOpts.ShowProgress)
+			assert.Equal(t, tt.wants.Prompt, gotOpts.Prompt)
+			assert.Equal(t, tt.wants.ExitStatus, gotOpts.ExitStatus)
+			assert.Equal(t, tt.wants.Verbose, gotOpts.Verbose)
 		})
 	}
 }
