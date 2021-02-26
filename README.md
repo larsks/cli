@@ -96,3 +96,5 @@ tool. Check out our [more detailed explanation][gh-vs-hub] to learn more.
 [contributing]: ./.github/CONTRIBUTING.md
 [gh-vs-hub]: ./docs/gh-vs-hub.md
 [build from source]: ./docs/source.md
+
+This is a test.
